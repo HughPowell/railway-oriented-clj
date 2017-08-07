@@ -10,17 +10,21 @@ env:
     - RELEASERS_NAME='Hugh Powell'
     # Use `travis encrypt MY_SECRET_ENV=super_secret`.
     # See here:https://docs.travis-ci.com/user/environment-variables/
-    - secure: "LEIN_USERNAME=[secure]"
-    - secure: "LEIN_PASSWORD=[secure]"
-    - secure: "RELEASERS_EMAIL=[secure]"
-    - secure: "GITHUB_TOKEN=[secure]"
+    # LEIN_USERNAME=[secure]
+    - secure: "yzIEXZFfp7AEGnSqCw+d40HN2S0wnbB0E9uFwgGMVqEZAA4Q/z1sq6DT54ZbxVxTCiSrMVL0/cbUTCPJogZf6RDgNLV4g0gljFMYAIhscIqEkdHEqLTKco3ZO/jH0Ds7WSB0s4Ui0Q0Lq+AMG9GUTNDIyIyD645mxlaAvnPAnM9uib3snSumTJRwqLbIk4t9B9+FpKyjeKYSlHfOuUNwZENxr2r4PRfBqHdClKtg8E/uUzlO5hDippw71ukUu2xVXPdq4AbQzeUhWFFwx1MkN8XbvjSt6HfrEaYDIk/vv7ObXCfT2t9btRHQUiqSbErTIRLrDO40ZDZx80SFR5cveH1D8ka1eQydsW1zUh3bLCpJa1l6I/rEghLOsjYVkTDDYH87JKqDSmWRk3JNY9qtIKrw5b2/yGGmfx8Qfof/9S5Xec7tjHDxGXX+bxifq6oVV9K9JORLsT6/dljQuoM6xuv9OU8om3e9oeH9UfdZceJUSutyrUOvok0eDhgR2REXVn+wdOY1zbwapw2L9nZnnwxmbxFT7C94NQuayRuHMkfyjMOqF9dbz6tlvMMRMQp6N8RT45QASc8EmPGEUvEXk47dqJYrk0n5N8D/L5QACbh70JGfVYW3NtUnDWrwjwL5kaRJ2FFrI8rv1taAKg2yylNRMOcPav+1ItEoWWOky+8="
+    # LEIN_PASSWORD=[secure]
+    - secure: "kuWk5me02vDiU9V+2n3Y0lTddJbVeY/Nf54NHlISPYWSmlHGpMaS4Hr2EMdJ9WeJnBgwosYUqtMs4L5jtgVPdcKKW9xgNDcce4sDSfgdu2imNlBeckeHvNnuvDpRiNieB2bLwjvtHFbpEv9aBvfMFq4MaeJ2r7hbb1p89SjKlZbvK/zSsKE2G78X19deqhSD6FkdCBJYDTGV1fDGmhc9UTBTk/8PZSaSBQxjGA7kzeD3vLFMesyZXZ34YM58svKoItWjKmJnpRzvN6ahmy0DURdq14Ld7cecdVx/Ta0PCgnWPskS+CGU8uMjuOf2xmSOLVKJvCDhU44mDjMqsuMfJAxvEIySpUDDoX9nkNsvLHTxy20VNwCWXqDq6On3TjebClnkf4dKFxct9Yp7Wz2rJjfNwxgD6CPG8yXhchC1eGr6HNN+1uv9kAVPPS2FLsuBoGbAFM49vL3DgTglugzQ3NEIkOpKyBaLlSgE2xLTYr/xVpY1gjoeMjTj1LPywxlZ4poehCVZqo9H1KaSqLrGCho+UgL++pjsk0Ul+DHvG5d0ZWpJ5rOwlKoZp2pWpNRBxNKXCs3ZheVYIcBnYwZz/jwg1qazS5cxctQLcdH593xfP9EBifyz3ln06G5pRiwXk0iIMTdMZHMe2qVtrFWFN5VgZsB3UKwH3tn92fxngAA="
+    # RELEASERS_EMAIL=[secure]
+    - secure: "R23CCzrrZoPSQrM1b+OHyIJ9AUIfVk8iUzo8K5EDSnNadrIVXyyt/fp6U4Ac4izvnpMtcG2y5/uCqfuOwLeuAOzzOJB9380CzJpD99WfbrV/vEMwgKM954ceL5hs4D+xuoKDsn0c9gRwIqXRIdbEqTkNgSmf5wa3S7hBDBQi2UrqzLi3R9YzrLqL0DlQn+oNK+CPPENURIV7L+86gehILNl9OMbG1kihZjkXspzjzQ+rrVjTjVYWZzAXk3V9pfYTxWBS+1ljO1Xb36nRDRQtUtMf2kFTr2Xr5NdG5Dy3TVosiGd8mxRMUIJauALuh67+/60tJfovi8pDaFUj7D3xF+0K6OI9kc7n6ct8WxE6hYH2atmu59ONIJ2FeeGWmNPYFewAYhhymjaMmllAC09rA/qk0xfRdRMIcvsllK8j5W1mmnQeHgpSSjoyOG5nM2s5r/AadpxxUSpqsBev5EgUf9k8kFprfE90wbzWIN6xCrfnLBjXJ0ou0RZNSNGBVP5CDf8tdsc3BOPYu1gPbCjGJ2owv1OVksEWDhxLTilqTixAEVjna52/myal+z+zffgbWTF3F0zw8hFqcypyCRCwXhpiYVtocMT0uwRT3UMCmY9sRtBPwigykaXNlNKNVaqFtD9CaS0EHNwYcSdjHTZ4aoDEpmcu9TSOEZGm3lyI8rE="
+    # GITHUB_TOKEN=[secure]
+    - secure: "yD09kQZ9en5wFWOtffvLCdQ9Oii93B4mAwRiygP/RXv4CSIy+GoI5v9SNlpvbXjp1rkOkHFleSzsZnR3iezYadNVuFl17A1pJvzV8Da7I0bI69os/bQ+XWxOWinI8SJ9ZmO0nzYRIurviszEf5twiAnHrSHPuHC+NjVa2LdrR/47GrF11A9+Jc15oSzDB1EjJV2GUh+GioXJ4847IzPHHM41zrYonsjkQ9LCZ4gsK6kxK/NQBXK1kZmLSAULLSd5KuAFQKj+Qr5V6/K9uqb+A5HGcoRcVGR8vdPa5UZ1iqoVDFhC2/duKsn7yuu/i3j8HjMQx71PDMOeOtCccyRfhj0/0g2pomgWhpkcshIXUuZ39ceBqQuu9gpjbgR8aEftBuziI6J/iWp+3g0lHreytuvpyZJ1VYWKoCH6lYVjpAhRXCDzOO9+bp6tjqSRC2ECSUSU21Ga9MEvgaEu3+sQt5Dw2+giGu1wWxZWFWU468PDWgmcXsXFEyZLAq5jtdodor73DofFVZnvcrsB8xT59mu/Zoy4hQDZzeuP+02iU+LvIBmujPpYJFwyaBsdi9Vbwc/QHEIQZ46gB1q3/h9YJEvLawGCkRul/uKGIifVWT/pg/K2aU+uQoV6/bS9i4YHneaWDLgpxjjvjvCzNJ4dUY5eJgh1eNt5VxeLYvWv5TM="
 
 before_install: yes y | sudo lein upgrade
 
 script: lein test
 
-#deploy:
-#  skip_cleanup: true
-#  provider: script
+deploy:
+  skip_cleanup: true
+  provider: script
 # Make sure this script is executable (e.g. run chmod +x deploy/travis_to_clojars.sh)
-#  script: ./deploy/travis_to_clojars.sh
+  script: ./deploy/travis_to_clojars.sh
