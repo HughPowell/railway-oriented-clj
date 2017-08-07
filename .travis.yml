@@ -1,0 +1,26 @@
+# Once you've generated the required secure environment variables
+# uncomment the deploy section
+
+sudo: true
+language: clojure
+
+env:
+  global:
+    - GITHUB_ORG=HughPowell
+    - RELEASERS_NAME='Hugh Powell'
+    # Use `travis encrypt MY_SECRET_ENV=super_secret`.
+    # See here:https://docs.travis-ci.com/user/environment-variables/
+    - secure: "LEIN_USERNAME=[secure]"
+    - secure: "LEIN_PASSWORD=[secure]"
+    - secure: "RELEASERS_EMAIL=[secure]"
+    - secure: "GITHUB_TOKEN=[secure]"
+
+before_install: yes y | sudo lein upgrade
+
+script: lein test
+
+#deploy:
+#  skip_cleanup: true
+#  provider: script
+# Make sure this script is executable (e.g. run chmod +x deploy/travis_to_clojars.sh)
+#  script: ./deploy/travis_to_clojars.sh
