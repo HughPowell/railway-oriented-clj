@@ -7,14 +7,15 @@
   (:require [uk.co.hughpowell.railway-oriented-clj.v1.impl.result-object :as result]))
 
 (defmacro ->
-  [f x switch-fn-forms]
+  [f x & switch-fn-forms]
   (loop [x (result/result true x), switch-fn-forms switch-fn-forms]
-    (if switch-fn-forms
+    (if (some? switch-fn-forms)
       (let [switch-fn-form (first switch-fn-forms)
             threaded (if (seq? switch-fn-form)
-                       (with-meta `((~f #(~(first switch-fn-form)
-                                           %
-                                           ~@(next switch-fn-form)))
+                       (with-meta `((~f (fn [a#]
+                                          (~(first switch-fn-form)
+                                            a#
+                                            ~@(next switch-fn-form))))
                                      ~x)
                                   (meta switch-fn-form))
                        (list (list `~f switch-fn-form) x))]
@@ -22,12 +23,16 @@
       x)))
 
 (defmacro ->>
-  [f x switch-fn-forms]
+  [f x & switch-fn-forms]
   (loop [x (result/result true x), switch-fn-forms switch-fn-forms]
-    (if switch-fn-forms
+    (if (some? switch-fn-forms)
       (let [switch-fn-form (first switch-fn-forms)
             threaded (if (seq? switch-fn-form)
-                       (with-meta `((~f #(~(first switch-fn-form) ~@(next switch-fn-form) %)) ~x)
+                       (with-meta `((~f (fn [a#]
+                                          (~(first switch-fn-form)
+                                            ~@(next switch-fn-form)
+                                            a#)))
+                                     ~x)
                                   (meta switch-fn-form))
                        (list (list `~f switch-fn-form) x))]
         (recur threaded (next switch-fn-forms)))

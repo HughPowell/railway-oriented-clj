@@ -2,7 +2,8 @@
   (:require [clojure.test :refer :all]
             [clojure.spec.test.alpha :as spec-test]
             [uk.co.hughpowell.railway-oriented-clj.v1.verifiers :as verifiers]
-            [uk.co.hughpowell.railway-oriented-clj.v1.public.lift :as lift]))
+            [uk.co.hughpowell.railway-oriented-clj.v1.public.lift :as lift]
+            [uk.co.hughpowell.railway-oriented-clj.v1.impl.adapters :as adapters]))
 
 (spec-test/instrument)
 
@@ -95,3 +96,32 @@
                   inc
                   failure-fn
                   inc)))))
+
+(deftest thread-as
+  (testing
+    "no forms return a successful result object"
+    (verifiers/verify-success
+      "foo"
+      (lift/as-> "foo" $)))
+  (testing
+    "one form returns the result as a success"
+    (verifiers/verify-success
+      "foobar"
+      (lift/as-> "bar" $
+                 (str "foo" $))))
+  (testing
+    "two forms threads all the way through."
+    (verifiers/verify-success
+      "foobarbaz"
+      (lift/as-> "bar" $
+                (str $ "baz")
+                (str "foo" $))))
+  (testing
+    "failure short circuits execution."
+    (let [failure-fn (constantly nil)]
+      (verifiers/verify-exception
+        (NullPointerException.)
+        (lift/as-> "bar" $
+                  (str $ "baz")
+                  (failure-fn)
+                  (str "foo" $))))))

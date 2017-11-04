@@ -107,3 +107,35 @@
                   switch-inc
                   failure-fn
                   switch-inc)))))
+
+(deftest thread-as
+  (testing
+    "no forms returns a successful result object."
+    (verifiers/verify-success
+      "foo"
+      (bind/as-> "foo" $)))
+  (testing
+    "one form returns the result as a success."
+    (let [switch-str (adapters/switch str)]
+      (verifiers/verify-success
+        "foobar"
+        (bind/as-> "bar" $
+                  (switch-str "foo" $)))))
+  (testing
+    "two forms threads all the way through."
+    (let [switch-str (adapters/switch str)]
+      (verifiers/verify-success
+        "foobarbaz"
+        (bind/as-> "bar" $
+                  (switch-str "foo" $)
+                  (switch-str $ "baz")))))
+  (testing
+    "failure short circuits execution."
+    (let [switch-str (adapters/switch str)
+          failure-fn (constantly (result/fail "fail"))]
+      (verifiers/verify-failure
+        "fail"
+        (bind/as-> "bar" $
+                  (switch-str "foo" $)
+                  (failure-fn)
+                  (switch-str $ "baz"))))))

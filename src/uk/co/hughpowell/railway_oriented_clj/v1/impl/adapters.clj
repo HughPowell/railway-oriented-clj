@@ -8,10 +8,11 @@
 
 (defn bind
   [switch-fn]
-  (fn [result-object]
-    (if (result-handlers/succeeded? result-object)
-      (-> result-object result-handlers/success switch-fn)
-      result-object)))
+  (fn [& result-objects]
+    (let [failures (filter result-handlers/failed? result-objects)]
+      (if (empty? failures)
+        (apply switch-fn (map result-handlers/success result-objects))
+        (first failures)))))
 
 (defn switch
   [regular-fn]
