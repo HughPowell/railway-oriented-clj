@@ -30,12 +30,11 @@
   `(arrange/->> adapters/lift ~x ~@regular-fn-forms))
 
 (defmacro as->
-    "Wraps each forms function as a switch function.  Wraps each resulting
-    form as a one parameter function using the name as the parameter.
-    Threads expr and the resulting forms through arrange/-> with
-    adapters/bind as f."
-    [expr name & regular-fn-forms]
-    (let [switch-fn-forms (map (fn [form#]
-                                 `((adapters/switch ~(first form#)) ~@(rest form#)))
-                               regular-fn-forms)]
-      `(bind/as-> ~expr ~name ~@switch-fn-forms)))
+  "Wraps each forms function as a switch function.  Wraps each resulting
+  form as a one parameter function using the name as the parameter.
+  Threads expr and the resulting forms through arrange/-> with
+  adapters/bind as f."
+  [expr name & regular-fn-forms]
+  (let [forms-as-functions (map (fn [form#] `((fn [~name] ~form#)))
+                                regular-fn-forms)]
+    `(-> ~expr ~@forms-as-functions)))

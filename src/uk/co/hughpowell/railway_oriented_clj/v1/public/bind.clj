@@ -34,7 +34,6 @@
   Threads expr and the resulting forms through arrange/-> with
   adapters/bind as f."
   [expr name & switch-fn-forms]
-  (let [bound-forms (map (fn [form#]
-                               `((fn [~name] ~form#)))
-                             switch-fn-forms)]
-    `(arrange/-> adapters/bind ~expr ~@bound-forms)))
+  (let [forms-as-functions (map (fn [form#] `((fn [~name] ~form#)))
+                                switch-fn-forms)]
+    `(-> ~expr ~@forms-as-functions)))
