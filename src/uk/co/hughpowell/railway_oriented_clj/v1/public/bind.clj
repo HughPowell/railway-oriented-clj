@@ -3,7 +3,7 @@
   This Source Code Form is subject to the terms of the Mozilla Public
   License, v. 2.0. If a copy of the MPL was not distributed with this
   file, You can obtain one at http://mozilla.org/MPL/2.0/."
-  (:refer-clojure :exclude [-> ->> as->])
+  (:refer-clojure :exclude [-> ->> as-> some-> some->>])
   (:require [uk.co.hughpowell.railway-oriented-clj.v1.impl.arrange :as arrange]
             [uk.co.hughpowell.railway-oriented-clj.v1.impl.adapters :as adapters]
             [uk.co.hughpowell.railway-oriented-clj.v1.impl.result-object :as result]))
@@ -37,3 +37,11 @@
   (let [forms-as-functions (map (fn [form#] `((fn [~name] ~form#)))
                                 switch-fn-forms)]
     `(-> ~expr ~@forms-as-functions)))
+
+(defmacro some->
+  [x & switch-fn-forms]
+  (-> ~x ~@switch-fn-forms))
+
+(defmacro some->> 
+  [x & switch-fn-forms]
+  (->> ~x ~@switch-fn-forms))
