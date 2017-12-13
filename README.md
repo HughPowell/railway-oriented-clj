@@ -33,7 +33,7 @@ Then just require the public namespaces
 
     (ns ... 
         (require ... 
-                 [uk.co.hughpowell.railway_oriented_clj.v1.public.... :as ...]
+                 [uk.co.hughpowell.railway-oriented-clj.v1.public.... :as ...]
                  ...))
 
 as per usual.
