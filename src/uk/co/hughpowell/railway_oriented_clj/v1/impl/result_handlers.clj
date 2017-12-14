@@ -4,6 +4,7 @@
   License, v. 2.0. If a copy of the MPL was not distributed with this
   file, You can obtain one at http://mozilla.org/MPL/2.0/."
   (:require [clojure.spec.alpha :as spec]
+            [clojure.future :refer :all]
             [uk.co.hughpowell.railway-oriented-clj.v1.impl.result-object :as result-object]))
 
 (defn succeeded?

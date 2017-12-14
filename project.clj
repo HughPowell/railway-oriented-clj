@@ -3,7 +3,8 @@
   :url "https://github.com/HughPowell/railway-oriented-clj"
   :license {:name "Mozilla Public License v2.0"
             :url "https://www.mozilla.org/en-US/MPL/2.0/"}
-  :dependencies [[org.clojure/clojure "1.9.0-alpha16"]]
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [clojure-future-spec "1.9.0-beta4"]]
   :plugins [[update-readme "0.1.0"]]
   :repositories [["releases" {:url "https://clojars.org/repo/"
                               :username :env
