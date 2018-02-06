@@ -19,10 +19,14 @@
 (defn handle
   "Takes success and failure functions and returns a function that
   applies them, as appropriate, to the given result object."
-  [success-fn failure-fn result]
-  (if (result-handlers/succeeded? result)
-    (-> result result-handlers/success success-fn)
-    (-> result result-handlers/failure failure-fn)))
+  ([result]
+    (handle identity identity result))
+  ([success-fn result]
+    (handle success-fn identity result))
+  ([success-fn failure-fn result]
+   (if (result-handlers/succeeded? result)
+     (-> result result-handlers/success success-fn)
+     (-> result result-handlers/failure failure-fn))))
 
 (defn combine
   "Applies each of the fns to the args.  If all the calls succeed, success-fn is
@@ -34,5 +38,5 @@
       (let [results (apply f args)
             failures (filter result-handlers/failed? results)]
         (if (empty? failures)
-          (apply success-fn (map result-handlers/success results))
-          (apply failure-fn (map result-handlers/failure failures)))))))
+          (succeed (apply success-fn (map result-handlers/success results)))
+          (fail (apply failure-fn (map result-handlers/failure failures))))))))

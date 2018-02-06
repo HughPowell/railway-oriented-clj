@@ -15,15 +15,17 @@
         (first failures)))))
 
 (defn switch
-  [regular-fn]
+  [regular-fn exception-handler]
   (fn [& regular-inputs]
     (try
       (result/result true (apply regular-fn regular-inputs))
-      (catch Exception e (result/result false e)))))
+      (catch Exception e (result/result false (exception-handler e))))))
 
 (defn lift
-  [regular-fn]
-  (-> regular-fn
-      switch
-      bind))
+  ([regular-fn]
+   (lift regular-fn identity))
+  ([regular-fn exception-handler]
+   (-> regular-fn
+       (switch exception-handler)
+       bind)))
 

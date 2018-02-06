@@ -15,6 +15,11 @@
       "foo"
       (bind/-> "foo")))
   (testing
+    "no forms returns a successful result object given a result object"
+    (verifiers/verify-success
+      "foo"
+      (bind/-> (result/succeed "foo"))))
+  (testing
     "one form returns the result as a success."
     (let [switch-str (adapters/switch str)]
       (verifiers/verify-success

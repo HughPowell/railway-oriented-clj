@@ -7,37 +7,27 @@
             [clojure.future :refer :all]))
 
 (spec/def ::success? boolean?)
-(spec/def ::success some?)
-(spec/def ::success-result (spec/keys :req-un [::success?
-                                               ::success]))
+(spec/def ::value some?)
+(spec/def ::result some?)
 
+(defrecord Result [success? value])
 (defn- succeed
   [value]
-  {:success? true
-   :success  value})
+  (->Result true value))
 
 (spec/fdef succeed
            :args (spec/cat :value some?)
-           :ret ::success-result)
-
-(spec/def ::failure some?)
-(spec/def ::failure-result (spec/keys :req-un [::success?
-                                               ::failure]))
+           :ret ::result)
 
 (defn- fail
   [failure]
-  {:success? false
-   :failure  failure})
+  (->Result false failure))
 
 (spec/fdef fail
            :args (spec/cat :failure some?)
-           :ret ::failure-result)
+           :ret ::result)
 
-(spec/def ::result (spec/or :success ::success-result
-                            :failure ::failure-result))
-
-(defn result
-  [success? data]
+(defn result [success? data]
   (if (some? data)
     (if success?
       (succeed data)

@@ -8,7 +8,7 @@
 
 (defmacro ->
   [f x & switch-fn-forms]
-  (loop [x (result/result true x), switch-fn-forms switch-fn-forms]
+  (loop [x `~x, switch-fn-forms switch-fn-forms]
     (if (some? switch-fn-forms)
       (let [switch-fn-form (first switch-fn-forms)
             threaded (if (seq? switch-fn-form)
@@ -24,7 +24,7 @@
 
 (defmacro ->>
   [f x & switch-fn-forms]
-  (loop [x (result/result true x), switch-fn-forms switch-fn-forms]
+  (loop [x `~x, switch-fn-forms switch-fn-forms]
     (if (some? switch-fn-forms)
       (let [switch-fn-form (first switch-fn-forms)
             threaded (if (seq? switch-fn-form)

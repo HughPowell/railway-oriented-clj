@@ -5,9 +5,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/."
   (:refer-clojure :exclude [-> ->> as-> some-> some->>])
   (:require [uk.co.hughpowell.railway-oriented-clj.v1.impl.arrange :as arrange]
-            [uk.co.hughpowell.railway-oriented-clj.v1.impl.adapters :as adapters]
-            [uk.co.hughpowell.railway-oriented-clj.v1.impl.result-object :as result]
-            [uk.co.hughpowell.railway-oriented-clj.v1.public.bind :as bind]))
+            [uk.co.hughpowell.railway-oriented-clj.v1.impl.adapters :as adapters]))
 
 (defmacro ->
   "Threads the expr through the regular-fn-forms.  Wraps x as a success

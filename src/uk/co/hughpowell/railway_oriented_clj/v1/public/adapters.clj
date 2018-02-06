@@ -9,17 +9,22 @@
   "An adapter that takes a regular function and turns it into a
   switch function.  The returned function encapsulates the result of
   the regular function in a successful result object."
-  [regular-fn]
-  (adapters/switch regular-fn))
+  ([regular-fn]
+    (switch regular-fn identity))
+  ([regular-fn exception-handler]
+   (adapters/switch regular-fn exception-handler)))
 
 (defn tee
   "An adapter that takes a dead-end-fn and turns it into a switch
   function returning it's parameters as it's result."
-  [dead-end-fn]
-  (adapters/switch
-    (fn [& args]
-      (apply dead-end-fn args)
-      args)))
+  ([dead-end-fn]
+    (tee dead-end-fn identity))
+  ([dead-end-fn exception-handler]
+   (adapters/switch
+     (fn [& args]
+       (apply dead-end-fn args)
+       args)
+     exception-handler)))
 
 (defn bind
   "An adapter that takes a switch function and creates a bound

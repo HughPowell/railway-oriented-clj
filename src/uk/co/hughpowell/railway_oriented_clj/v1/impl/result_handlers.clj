@@ -5,31 +5,32 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/."
   (:require [clojure.spec.alpha :as spec]
             [clojure.future :refer :all]
-            [uk.co.hughpowell.railway-oriented-clj.v1.impl.result-object :as result-object]))
+            [uk.co.hughpowell.railway-oriented-clj.v1.impl.result-object :as result-object])
+  (:import (uk.co.hughpowell.railway_oriented_clj.v1.impl.result_object Result)))
 
 (defn succeeded?
-  [{:keys [success?]}]
-  success?)
+  [{:keys [success?] :as result}]
+  (or success? (not (instance? Result result))))
 
 (spec/fdef succeeded?
            :args (spec/cat :result ::result-object/result)
            :ret boolean?)
 
-(def failed? (comp not succeeded?))
+(def failed? (complement succeeded?))
 
 (defn success
-  [{:keys [success]}]
-  success)
+  [{:keys [value] :as result}]
+  (or value result))
 
 (spec/fdef success
-           :args (spec/cat :success ::result-object/success-result)
+           :args (spec/cat :success ::result-object/result)
            :ret some?)
 
 (defn failure
-  [{:keys [failure]}]
-  failure)
+  [{:keys [value]}]
+  value)
 
 (spec/fdef failure
-           :args (spec/cat :failure ::result-object/failure-result)
+           :args (spec/cat :failure ::result-object/result)
            :ret some?)
 

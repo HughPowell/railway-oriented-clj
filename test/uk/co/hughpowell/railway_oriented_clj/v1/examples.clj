@@ -155,10 +155,10 @@
                (use-case {:name "" :email ""})))))))
 
 (defn add-success [head & _]
-  (result/succeed head))
+  head)
 
 (defn add-failure [& args]
-  (result/fail (apply str (interpose "; " args))))
+  (apply str (interpose "; " args)))
 
 (def combined-validator
   (result/combine
