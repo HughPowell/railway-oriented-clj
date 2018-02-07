@@ -10,7 +10,9 @@
 
 (defn succeeded?
   [{:keys [success?] :as result}]
-  (or success? (not (instance? Result result))))
+  (if (instance? Result result)
+    success?
+    true))
 
 (spec/fdef succeeded?
            :args (spec/cat :result ::result-object/result)
@@ -20,7 +22,9 @@
 
 (defn success
   [{:keys [value] :as result}]
-  (if (some? value) value result))
+  (if (instance? Result result)
+    value
+    result))
 
 (spec/fdef success
            :args (spec/cat :success ::result-object/result)
