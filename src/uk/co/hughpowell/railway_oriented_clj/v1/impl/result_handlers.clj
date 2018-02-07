@@ -20,7 +20,7 @@
 
 (defn success
   [{:keys [value] :as result}]
-  (or value result))
+  (if (some? value) value result)
 
 (spec/fdef success
            :args (spec/cat :success ::result-object/result)
