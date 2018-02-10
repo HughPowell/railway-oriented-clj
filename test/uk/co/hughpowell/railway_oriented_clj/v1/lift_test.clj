@@ -3,7 +3,8 @@
             [clojure.spec.test.alpha :as spec-test]
             [uk.co.hughpowell.railway-oriented-clj.v1.verifiers :as verifiers]
             [uk.co.hughpowell.railway-oriented-clj.v1.public.lift :as lift]
-            [uk.co.hughpowell.railway-oriented-clj.v1.impl.adapters :as adapters]))
+            [uk.co.hughpowell.railway-oriented-clj.v1.public.adapters :as adapters]
+            [uk.co.hughpowell.railway-oriented-clj.v1.public.result :as result]))
 
 (spec-test/instrument)
 
@@ -50,7 +51,15 @@
         (lift/-> 1
                  inc
                  failure-fn
-                 inc)))))
+                 inc))))
+  (testing
+    "multiple result arguments"
+    (let [one (result/succeed 1)
+          switch-+ (adapters/switch +)]
+      (verifiers/verify-success
+        (result/succeed 3)
+        (lift/-> 2
+                 (switch-+ one))))))
 
 (deftest thread-last
   (testing
@@ -95,7 +104,15 @@
         (lift/->> 1
                   inc
                   failure-fn
-                  inc)))))
+                  inc))))
+  (testing
+    "multiple result arguments"
+    (let [one (result/succeed 1)
+          switch-+ (adapters/switch +)]
+      (verifiers/verify-success
+        (result/succeed 3)
+        (lift/->> 2
+                 (switch-+ one))))))
 
 (deftest thread-as
   (testing

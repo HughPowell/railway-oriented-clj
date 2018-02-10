@@ -61,7 +61,15 @@
         (bind/-> 1
                  switch-inc
                  failure-fn
-                 switch-inc)))))
+                 switch-inc))))
+  (testing
+    "multiple result arguments"
+    (let [one (result/succeed 1)
+          switch-+ (adapters/switch +)]
+      (verifiers/verify-success
+        3
+        (bind/-> 2
+                 (switch-+ one))))))
 
 (deftest thread-last
   (testing
@@ -111,7 +119,15 @@
         (bind/->> 1
                   switch-inc
                   failure-fn
-                  switch-inc)))))
+                  switch-inc))))
+  (testing
+    "multiple result arguments"
+    (let [one (result/succeed 1)
+          switch-+ (adapters/switch +)]
+      (verifiers/verify-success
+        3
+        (bind/->> 2
+                 (switch-+ one))))))
 
 (deftest thread-as
   (testing

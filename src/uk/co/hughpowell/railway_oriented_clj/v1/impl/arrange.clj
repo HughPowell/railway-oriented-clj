@@ -12,10 +12,10 @@
     (if (some? switch-fn-forms)
       (let [switch-fn-form (first switch-fn-forms)
             threaded (if (seq? switch-fn-form)
-                       (with-meta `((~f (fn [a#]
-                                          (~(first switch-fn-form)
-                                            a#
-                                            ~@(next switch-fn-form))))
+                       (with-meta `((fn [a#]
+                                      ((~f ~(first switch-fn-form))
+                                        a#
+                                        ~@(next switch-fn-form)))
                                      ~x)
                                   (meta switch-fn-form))
                        (list (list `~f switch-fn-form) x))]
@@ -28,10 +28,10 @@
     (if (some? switch-fn-forms)
       (let [switch-fn-form (first switch-fn-forms)
             threaded (if (seq? switch-fn-form)
-                       (with-meta `((~f (fn [a#]
-                                          (~(first switch-fn-form)
-                                            ~@(next switch-fn-form)
-                                            a#)))
+                       (with-meta `((fn [a#]
+                                      ((~f ~(first switch-fn-form))
+                                        ~@(next switch-fn-form)
+                                        a#))
                                      ~x)
                                   (meta switch-fn-form))
                        (list (list `~f switch-fn-form) x))]
