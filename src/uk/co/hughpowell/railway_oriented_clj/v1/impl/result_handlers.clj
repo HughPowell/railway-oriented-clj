@@ -12,7 +12,7 @@
   [{:keys [success?] :as result}]
   (if (instance? Result result)
     success?
-    true))
+    (some? result)))
 
 (spec/fdef succeeded?
            :args (spec/cat :result ::result-object/result)
