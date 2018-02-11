@@ -12,9 +12,13 @@
     (let [failures (filter result-handlers/failed? result-objects)]
       (if (empty? failures)
         (apply switch-fn (map result-handlers/success result-objects))
-        (if-some [failure (first failures)] 
-          failure
-          (result/result false (NullPointerException.)))))))
+        (let [failures (map (fn [failure] (if (some? failure)
+                                            failure
+                                            (result/result false nil)))
+                            failures)]
+          (if (= (count failures) 1)
+            (first failures)
+            (result/result false (map result-handlers/failure failures))))))))
 
 (defn switch
   [regular-fn exception-handler]

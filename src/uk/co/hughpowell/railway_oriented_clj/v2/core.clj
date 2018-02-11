@@ -4,9 +4,9 @@
             [uk.co.hughpowell.railway-oriented-clj.v1.impl.adapters :as adapters]
             [uk.co.hughpowell.railway-oriented-clj.v1.impl.result-handlers :as result-handlers]
             [clojure.core :as core])
-  (:refer-clojure :exclude [-> ->> as-> some-> some->>]))
+  (:refer-clojure :exclude [-> ->> as-> some-> some->> comp]))
 
-(defn fail 
+(defn fail
   "Create failure result from the given failure.  The value will be a
   NullPointerException if failure is nil."
   [failure] (result/result false failure))
@@ -85,13 +85,7 @@
                                 roc-fn-forms)]
     `(-> ~expr ~@forms-as-functions)))
 
-(defmacro some->
-  "Alias for ->, included for completeness."
-  [x & switch-fn-forms]
-  (-> ~x ~@switch-fn-forms))
-
-(defmacro some->>
-  "Alias for ->>, included for completness."
-  [x & switch-fn-forms]
-  (->> ~x ~@switch-fn-forms))
-
+(defn comp [& fns]
+  "Returns a function that is a composition of fns that short circuits
+  should one fail."
+  (apply core/comp (map adapters/bind fns)))

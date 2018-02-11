@@ -23,39 +23,75 @@
 
 (defn expected-failure [expected-failure result]
   (roc/handle
-    (fn [_] (is false))
+    (fn [success] (is false (str "success " success " not expected")))
     (fn [failure] (is (= failure expected-failure)))
     result))
 
 (defn expected-exception-failure [expected-failure result]
   (roc/handle
-    (fn [_] (is false))
+    (fn [success] (is false (str "success " success " not expected")))
     (fn [failure] (is (= (type failure) expected-failure)))
     result))
 
 (defn expected-success [expected-success result]
   (roc/handle
     (fn [success] (is (= expected-success success)))
-    (fn [_] (is false))
+    (fn [failure] (is false (str "failure " failure " not expected")))
     result))
 
 (deftest empty-name-empty-email
-  (testing "empty name and empty email short circuits on name check."
+  (testing "using thread first, empty name and empty email short circuits
+  on name check."
     (expected-failure
       blank-name-text
       (roc/-> {:name "" :email ""}
               validate-name-text
               validate-name-length
-              validate-email-text))))
+              validate-email-text)))
+  (testing "using thread last, empty name and empty email short circuits
+  on name check."
+    (expected-failure
+      blank-name-text
+      (roc/->> {:name "" :email ""}
+               validate-name-text
+               validate-name-length
+               validate-email-text)))
+  (testing "using comp, empty name and empty email short circuits on name
+  check."
+    (expected-failure
+      blank-name-text
+      (let [validate (roc/comp
+                       validate-email-text
+                       validate-name-length
+                       validate-name-text)]
+        (validate {:name "" :email ""})))))
 
 (deftest legal-name-empty-email
-  (testing "legal name and empty email short circuits on email check."
+  (testing "using thread first, legal name and empty email short circuits
+  on email check."
     (expected-failure
       blank-email-text
       (roc/-> {:name "Alice" :email ""}
               validate-name-text
               validate-name-length
-              validate-email-text))))
+              validate-email-text)))
+  (testing "using thread last, legal name and empty email short circuits
+  on email check."
+    (expected-failure
+      blank-email-text
+      (roc/->> {:name "Alice" :email ""}
+               validate-name-text
+               validate-name-length
+               validate-email-text)))
+  (testing "using comp, legal name and empty email short circuits on email
+   check."
+    (expected-failure
+      blank-email-text
+      (let [validate (roc/comp
+                       validate-email-text
+                       validate-name-length
+                       validate-name-text)]
+        (validate {:name "Alice" :email ""})))))
 
 (defn canonicalise-email [{:keys [email] :as input}]
   (->> email
@@ -108,7 +144,7 @@
                 validate-name-length
                 exception-thrower
                 validate-email-text))))
-  
+
   (testing "exception throwing function using custom error handler."
     (let [error-handler (fn [e] {:type  :exception
                                  :error e})
@@ -126,8 +162,8 @@
 
 (deftest map-reduce
   (let [parallel-validation (partial roc/map-reduce
-                              (fn [& args] (apply merge args))
-                              (fn [& args] (apply str (interpose "; " args))))]
+                                     (fn [& args] (apply merge args))
+                                     (fn [& args] (apply str (interpose "; " args))))]
     (testing "2 failures"
       (expected-failure
         (str blank-name-text "; " blank-email-text)
@@ -135,7 +171,7 @@
           (validate-name-text {:name "" :email ""})
           (validate-name-length {:name "" :email ""})
           (validate-email-text {:name "" :email ""}))))
-    
+
     (testing "1 failure"
       (expected-failure
         blank-email-text
@@ -143,11 +179,11 @@
           (validate-name-text {:name "Alice" :email ""})
           (validate-name-length {:name "Alice" :email ""})
           (validate-email-text {:name "Alice" :email ""}))))
-    
+
     (testing "success"
       (expected-success
         {:name "Alice" :email "good"}
-        (parallel-validation 
+        (parallel-validation
           (validate-name-text {:name "Alice" :email "good"})
           (validate-name-length {:name "Alice" :email "good"})
           (validate-email-text {:name "Alice" :email "good"}))))))
@@ -163,12 +199,12 @@
       (expected-failure
         (str blank-name-text "; " blank-email-text)
         (parallel-validation {:name "" :email ""})))
-    
+
     (testing "1 failure"
       (expected-failure
         blank-email-text
         (parallel-validation {:name "Alice" :email ""})))
-    
+
     (testing "success"
       (expected-success
         {:name "Alice" :email "good"}
