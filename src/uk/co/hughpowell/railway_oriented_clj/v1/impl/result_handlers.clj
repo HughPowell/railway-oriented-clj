@@ -9,9 +9,9 @@
   (:import (uk.co.hughpowell.railway_oriented_clj.v1.impl.result_object Result)))
 
 (defn succeeded?
-  [{:keys [success?] :as result}]
+  [result]
   (if (instance? Result result)
-    success?
+    (:success? result)
     (some? result)))
 
 (spec/fdef succeeded?
@@ -21,9 +21,9 @@
 (def failed? (complement succeeded?))
 
 (defn success
-  [{:keys [value] :as result}]
+  [result]
   (if (instance? Result result)
-    value
+    (:value result)
     result))
 
 (spec/fdef success

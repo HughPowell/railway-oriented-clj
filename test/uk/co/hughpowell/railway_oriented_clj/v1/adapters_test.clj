@@ -60,7 +60,24 @@
     (verifiers/verify-failure
       "fail"
       ((adapters/bind (adapters/switch (partial str "foo")))
-        (result/fail "fail")))))
+        (result/fail "fail"))))
+  (testing
+    "binding a switch function and calling with multiple successes"
+    (verifiers/verify-success
+      "foobarbaz"
+      ((adapters/bind (adapters/switch (partial str "foo")))
+        (result/succeed "bar")
+        (result/succeed "bar")
+        (result/succeed "baz"))))
+  (testing
+    "binding a switch function and calling with a failure"
+    (verifiers/verify-failure
+      ["fail" "fast"]
+      ((adapters/bind (adapters/switch (partial str "foo")))
+        (result/succeed "bar")
+        (result/succeed "bar")
+        (result/fail "fail")
+        (result/fail "fast")))))
 
 (deftest lift
   (testing

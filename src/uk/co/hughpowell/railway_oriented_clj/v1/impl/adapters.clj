@@ -15,7 +15,10 @@
             failures (filter result-handlers/failed? result-objects)]
         (if (empty? failures)
           (apply switch-fn (map result-handlers/success result-objects))
-          (result/result false (map result-handlers/failure failures)))))))
+          (result/result false (map (fn [failure] (if (nil? failure)
+                                                    (NullPointerException.)
+                                                    (result-handlers/failure failure)))
+                                    failures)))))))
 
 (defn switch
   [regular-fn exception-handler]
