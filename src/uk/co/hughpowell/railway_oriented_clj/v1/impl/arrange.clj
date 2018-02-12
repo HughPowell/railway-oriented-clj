@@ -15,6 +15,7 @@
                        (with-meta `((fn [a#]
                                       ((~f ~(first switch-fn-form))
                                         a#
+                                        a#
                                         ~@(next switch-fn-form)))
                                      ~x)
                                   (meta switch-fn-form))
@@ -30,6 +31,7 @@
             threaded (if (seq? switch-fn-form)
                        (with-meta `((fn [a#]
                                       ((~f ~(first switch-fn-form))
+                                        a#
                                         ~@(next switch-fn-form)
                                         a#))
                                      ~x)

@@ -8,17 +8,14 @@
 
 (defn bind
   [switch-fn]
-  (fn [& result-objects]
-    (let [failures (filter result-handlers/failed? result-objects)]
-      (if (empty? failures)
-        (apply switch-fn (map result-handlers/success result-objects))
-        (let [failures (map (fn [failure] (if (some? failure)
-                                            failure
-                                            (result/result false nil)))
-                            failures)]
-          (if (= (count failures) 1)
-            (first failures)
-            (result/result false (map result-handlers/failure failures))))))))
+  (fn [result-object & params]
+    (if (result-handlers/failed? result-object)
+      (if (nil? result-object) (result/result false nil) result-object)
+      (let [result-objects (if (empty? params) [result-object] params)
+            failures (filter result-handlers/failed? result-objects)]
+        (if (empty? failures)
+          (apply switch-fn (map result-handlers/success result-objects))
+          (result/result false (map result-handlers/failure failures)))))))
 
 (defn switch
   [regular-fn exception-handler]
