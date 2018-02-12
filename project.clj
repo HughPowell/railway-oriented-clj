@@ -1,4 +1,4 @@
-(defproject uk.co.hughpowell/railway-oriented-clj "0.2.3-SNAPSHOT"
+(defproject uk.co.hughpowell/railway-oriented-clj "0.2.3"
   :description "FIXME: write description"
   :url "https://github.com/HughPowell/railway-oriented-clj"
   :license {:name "Mozilla Public License v2.0"
