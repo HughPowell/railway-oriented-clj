@@ -4,7 +4,8 @@
   License, v. 2.0. If a copy of the MPL was not distributed with this
   file, You can obtain one at http://mozilla.org/MPL/2.0/."
   (:require [uk.co.hughpowell.railway-oriented-clj.v1.impl.result-handlers :as result-handlers]
-            [uk.co.hughpowell.railway-oriented-clj.v1.impl.result-object :as result]))
+            [uk.co.hughpowell.railway-oriented-clj.v1.impl.result-object :as result])
+  (:import (uk.co.hughpowell.railway_oriented_clj.v1.impl.result_object Result)))
 
 (defn bind
   [switch-fn]
@@ -12,7 +13,11 @@
     (if (result-handlers/failed? result-object)
       (if (nil? result-object) (result/result false nil) result-object)
       (let [result-objects (if (empty? params) [result-object] params)
-            failures (filter result-handlers/failed? result-objects)]
+            failures (filter (fn [result]
+                               (if (instance? Result result)
+                                 (not (:success? result))
+                                 false))
+                             result-objects)]
         (if (empty? failures)
           (apply switch-fn (map result-handlers/success result-objects))
           (result/result false (map (fn [failure] (if (nil? failure)
