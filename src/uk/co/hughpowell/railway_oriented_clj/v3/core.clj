@@ -32,9 +32,10 @@
 
 ;; Upgrades
 
-(def ^:private get-failures
-  (core/comp (map #(if (nil? %) ((impl/get-nil-handler)) %))
-             (filter (impl/get-failure?-fn))))
+(defn get-failures [params]
+  (core/->> params
+            (map #(if (nil? %) ((impl/get-nil-handler)) %))
+            (filter (impl/get-failure?-fn))))
 
 (defn wrap
   "Wrap the given function to return a failure should a failure be
@@ -43,7 +44,7 @@
    (wrap f (impl/get-unexpected-exception-handler)))
   ([f exception-handler]
    (fn [& args]
-     (let [failures (sequence get-failures args)]
+     (let [failures (get-failures args)]
        (if (empty? failures)
          (try
            (apply f args)
@@ -171,7 +172,7 @@
   ([failure-fn results]
    (combine (fn [& args] args) failure-fn results))
   ([success-fn failure-fn results]
-   (let [failures (sequence get-failures results)]
+   (let [failures (get-failures results)]
      (if (empty? failures)
        (apply success-fn results)
        (failure-fn failures)))))
