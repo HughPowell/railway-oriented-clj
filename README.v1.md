@@ -26,15 +26,15 @@ For Leiningen, add the following to the dependencies key in project.clj
 
     :dependencies
         [...
-         [uk.co.hughpowell/railway-oriented-clj "0.3.0"]
+         [uk.co.hughpowell/railway-oriented-clj "0.2.5"]
          ...]
 
 Then just require the public namespaces
 
     (ns ... 
-        (require ... 
-                 [uk.co.hughpowell.railway-oriented-clj.v1.public.... :as ...]
-                 ...))
+      (:require ... 
+        [uk.co.hughpowell.railway-oriented-clj.v2.public.... :as ...]
+        ...))
 
 as per usual.
 
@@ -63,7 +63,7 @@ To then use it in your project add it to the projects dependencies in project.cl
 
     :dependencies
         [...
-         [uk.co.hughpowell/railway-oriented-clj "0.3.1-SNAPSHOT"]
+         [uk.co.hughpowell/railway-oriented-clj "0.2.6-SNAPSHOT"]
          ...]
 
 ## Ownership and License
