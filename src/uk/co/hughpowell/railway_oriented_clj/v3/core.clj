@@ -1,7 +1,8 @@
 (ns uk.co.hughpowell.railway-oriented-clj.v3.core
   (:refer-clojure :exclude [-> ->> as-> comp when-let if-let])
   (:require [clojure.core :as core]
-            [uk.co.hughpowell.railway-oriented-clj.v3.impl :as impl]))
+            [uk.co.hughpowell.railway-oriented-clj.v3.impl :as impl])
+  (:import (clojure.lang Cons)))
 
 ;; Set up
 
@@ -60,6 +61,14 @@
           (when more
             (list* `assert-args more)))))
 
+(defn wrap-form? [form]
+  (and (or (list? form)
+           (instance? Cons form))
+       (or (core/-> form first symbol? not)
+           (not=
+             (core/-> form first resolve meta :ns)
+             (core/-> wrap-form? var meta :ns)))))
+
 (defmacro ->
   "Thread first similar to the core macro, except that if a failure is
   discovered execution halts and the error is returned."
@@ -72,7 +81,9 @@
       (let [form (first forms)
             threaded (if (seq? form)
                        (with-meta
-                         `((wrap ~(first form)) ~value ~@(next form))
+                         (if (wrap-form? form)
+                           `((wrap ~(first form)) ~value ~@(next form))
+                           `(~(first form) ~value ~@(next form)))
                          (meta form))
                        (list `(wrap ~form) value))]
         (recur threaded (next forms)))
@@ -93,7 +104,9 @@
       (let [form (first forms)
             threaded (if (seq? form)
                        (with-meta
-                         `((wrap ~(first form)) ~@(next form) ~value)
+                         (if (wrap-form? form)
+                           `((wrap ~(first form)) ~@(next form) ~value)
+                           `(~(first form) ~@(next form) ~value))
                          (meta form))
                        (list `(wrap ~form) value))]
         (recur threaded (next forms)))
@@ -102,23 +115,21 @@
            value#
            ((impl/get-nil-handler)))))))
 
+(defn- bind-form [form]
+  (if (wrap-form? form)
+    (cons (list wrap (first form)) (next form))
+    form))
+
 (defmacro as->
   "Thread 'as' similar to the core macro, except that if a failure
   occurs execution halts and the error is returned."
   [expr name & forms]
-  (let [bind-form (fn [[f & args]] (cons (list wrap f) args))
-        value (if (list? expr) (bind-form expr) expr)]
-    `(let [value# ~value
-           ~name (if (some? value#) value# ((impl/get-nil-handler)))
-           ~@(interleave (repeat name) (map bind-form (butlast forms)))]
-       ~(if (empty? forms)
-          name
-          (bind-form (last forms))))))
-
-(defn- bind-form [form]
-  (if (list? form)
-    (cons (list wrap (first form)) (next form))
-    form))
+  `(let [value# ~(bind-form expr)
+         ~name (if (some? value#) value# ((impl/get-nil-handler)))
+         ~@(interleave (repeat name) (map bind-form (butlast forms)))]
+     ~(if (empty? forms)
+        name
+        (bind-form (last forms)))))
 
 (defmacro when-let
   "Similar to the core when-let macro, except that multiple pairs are
@@ -132,7 +143,7 @@
          expr `(do ~@exprs)]
     (if (empty? bindings)
       expr
-      (let [tst (bind-form (first bindings))
+      (let [tst (bind-form `~(first bindings))
             form (second bindings)
             threaded `(let [temp# ~tst
                             temp# (if (some? temp#) temp# ((impl/get-nil-handler)))]
@@ -174,7 +185,8 @@
   (assert-args
     (vector? bindings) "a vector for its bindings"
     (= 2 (count bindings)) "exactly 2 forms in binding vector")
-  (let [form (bindings 0) tst (bind-form (bindings 1))]
+  (let [form (bindings 0)
+        tst (bind-form (bindings 1))]
     `(let [result# ~tst
            result# (if (some? result#) result# ((impl/get-nil-handler)))
            ~form result#]

@@ -33,6 +33,9 @@
     result"
     (is (= (roc/-> (- 2 1)) 1)))
   (testing
+    "Allow evaluation of railway oriented clj macro"
+    (is (= (roc/-> 1 inc (roc/-> dec)) 1)))
+  (testing
     "A single function with a failed parameter should return the failure."
     (let [failure (RuntimeException.)]
       (is (= (roc/-> (- 2 failure)) failure))))
@@ -72,6 +75,9 @@
     "A single function with all successful parameters should return the
     evaluated result"
     (is (= (roc/->> (- 2 1)) 1)))
+  (testing
+    "Allow evaluation of railway oriented clj macro"
+    (is (= (roc/->> inc (roc/-> 1)) 2)))
   (testing
     "A single function with a failed parameter should return that
     failure"
@@ -113,6 +119,11 @@
     "A single function with all successful parameters should return the
     evaluated the result"
     (is (= (roc/as-> (- 2 1) $) 1)))
+  (testing
+    "Allow evaluation of railway oriented clj macro"
+    (is (= (roc/as-> 1 $
+                     (roc/-> 1 (+ $))
+                     (roc/->> $ (+ 2))) 4)))
   (testing
     "A single function with a failed parameter should return that
     failure"
@@ -163,6 +174,13 @@
   (testing
     "Execution completes if the assignment is a success"
     (is (= (roc/when-let [x 1] x) 1)))
+  (testing
+    "Execution completes if the assignment is a successful function
+    call"
+    (is (= (roc/when-let [x (+ 1 2)] x) 3)))
+  (testing
+    "Allow evaluation of railway oriented clj macros"
+    (is (= (roc/when-let [x (roc/-> 1 inc (+ 2))] x) 4)))
   (testing
     "Return the failure when a failure occurs"
     (let [failure (RuntimeException.)]
@@ -218,6 +236,11 @@
                        x
                        :fail)
            :success)))
+  (testing
+    "Allow execution of railway oriented clj macros"
+    (is (= (roc/if-let [x (roc/-> 1 inc (+ 2))]
+                       x
+                       :fail))))
   (testing
     "Execute the 'else' branch when the test is a failure"
     (let [failure (RuntimeException.)]
