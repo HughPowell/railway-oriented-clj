@@ -21,6 +21,14 @@
   [nil-handler]
   (swap! impl/failure-handlers assoc :nil-handler nil-handler))
 
+(defn set-multiple-failure-handler!
+  "Set the function that handles multiple failures"
+  [multiple-failure-handler]
+  (swap! impl/failure-handlers
+         assoc
+         :multiple-failure-handler
+         multiple-failure-handler))
+
 ;; Upgrades
 
 (def ^:private get-failures
@@ -39,7 +47,7 @@
          (try
            (apply f args)
            (catch Exception e (exception-handler e)))
-         (first failures))))))
+         ((impl/get-multiple-failure-handler) failures))))))
 
 ;; Sequential flow control
 
@@ -148,7 +156,7 @@
   arguments.  If there are one or more failures then the failure-fn is
   called with the list of results."
   ([results]
-   (combine first results))
+   (combine (impl/get-multiple-failure-handler) results))
   ([failure-fn results]
    (combine (fn [& args] args) failure-fn results))
   ([success-fn failure-fn results]
