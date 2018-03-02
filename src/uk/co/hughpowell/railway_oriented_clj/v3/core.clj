@@ -31,24 +31,10 @@
 
 ;; Upgrades
 
-(defn get-failures [params]
-  (core/->> params
-            (map #(if (nil? %) ((impl/get-nil-handler)) %))
-            (filter (impl/get-failure?-fn))))
-
-(defn wrap
+(def wrap
   "Wrap the given function to return a failure should a failure be
   encountered."
-  ([f]
-   (wrap f (impl/get-unexpected-exception-handler)))
-  ([f exception-handler]
-   (fn [& args]
-     (let [failures (get-failures args)]
-       (if (empty? failures)
-         (try
-           (apply f args)
-           (catch Exception e (exception-handler e)))
-         ((impl/get-multiple-failure-handler) failures))))))
+  impl/wrap)
 
 ;; Sequential flow control
 
@@ -61,67 +47,47 @@
           (when more
             (list* `assert-args more)))))
 
-(defn- bind-form [form]
-  (if (impl/wrap-form? form)
-    (cons (list wrap (first form)) (next form))
-    form))
-
 (defmacro ->
   "Thread first similar to the core macro, except that if a failure is
   discovered execution halts and the error is returned."
   [x & forms]
-  (loop [value (bind-form x)
+  (loop [value (impl/wrap-initial-thread-form x)
          forms forms]
     (if forms
       (let [form (first forms)
             threaded (if (seq? form)
                        (with-meta
-                         (if (impl/wrap-form? form)
-                           `((wrap ~(first form)) ~value ~@(next form))
-                           `(~(first form) ~value ~@(next form)))
+                         (impl/wrap-form `(~(first form) ~value ~@(next form)))
                          (meta form))
-                       (if (impl/wrap-symbol? form)
-                         (list `(wrap ~form) value)
-                         (list form value)))]
+                       (impl/wrap-form (list form value)))]
         (recur threaded (next forms)))
-      `(let [value# ~value]
-         (if (some? value#)
-           value#
-           ((impl/get-nil-handler)))))))
+      `(impl/handle-nil ~value))))
 
 (defmacro ->>
   "Thread last similar to the core macro, except that if a failure
   occurs execution halts and the error is returned."
   [x & forms]
-  (loop [value (bind-form x)
+  (loop [value (impl/wrap-initial-thread-form x)
          forms forms]
     (if forms
       (let [form (first forms)
             threaded (if (seq? form)
                        (with-meta
-                         (if (impl/wrap-form? form)
-                           `((wrap ~(first form)) ~@(next form) ~value)
-                           `(~(first form) ~@(next form) ~value))
+                         (impl/wrap-form `(~(first form) ~@(next form) ~value))
                          (meta form))
-                       (if (impl/wrap-symbol? form)
-                         (list `(wrap ~form) value)
-                         (list form value)))]
+                       (impl/wrap-form (list form value)))]
         (recur threaded (next forms)))
-      `(let [value# ~value]
-         (if (some? value#)
-           value#
-           ((impl/get-nil-handler)))))))
+      `(impl/handle-nil ~value))))
 
 (defmacro as->
   "Thread 'as' similar to the core macro, except that if a failure
   occurs execution halts and the error is returned."
   [expr name & forms]
-  `(let [value# ~(bind-form expr)
-         ~name (if (some? value#) value# ((impl/get-nil-handler)))
-         ~@(interleave (repeat name) (map bind-form (butlast forms)))]
+  `(let [~name ~(impl/wrap-form expr)
+         ~@(interleave (repeat name) (map impl/wrap-form (butlast forms)))]
      ~(if (empty? forms)
         name
-        (bind-form (last forms)))))
+        (impl/wrap-form (last forms)))))
 
 (defmacro when-let
   "Similar to the core when-let macro, except that multiple pairs are
@@ -135,10 +101,8 @@
          expr `(do ~@exprs)]
     (if (empty? bindings)
       expr
-      (let [tst (bind-form `~(first bindings))
-            form (second bindings)
-            threaded `(let [temp# ~tst
-                            temp# (if (some? temp#) temp# ((impl/get-nil-handler)))]
+      (let [form (second bindings)
+            threaded `(let [temp# ~(impl/wrap-form (first bindings))]
                         (if ((impl/get-failure?-fn) temp#)
                           temp#
                           (let [~form temp#]
@@ -163,7 +127,7 @@
   ([failure-fn results]
    (combine (fn [& args] args) failure-fn results))
   ([success-fn failure-fn results]
-   (let [failures (get-failures results)]
+   (let [failures (impl/get-failures results)]
      (if (empty? failures)
        (apply success-fn results)
        (failure-fn failures)))))
@@ -177,10 +141,8 @@
   (assert-args
     (vector? bindings) "a vector for its bindings"
     (= 2 (count bindings)) "exactly 2 forms in binding vector")
-  (let [form (bindings 0)
-        tst (bind-form (bindings 1))]
-    `(let [result# ~tst
-           result# (if (some? result#) result# ((impl/get-nil-handler)))
+  (let [form (bindings 0)]
+    `(let [result# ~(impl/wrap-form (bindings 1))
            ~form result#]
        (if ((impl/get-failure?-fn) result#)
          ~else

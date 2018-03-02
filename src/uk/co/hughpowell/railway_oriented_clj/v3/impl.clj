@@ -27,7 +27,17 @@
 (defn reset-failure-handlers []
   (reset! failure-handlers default-failure-handlers))
 
-(defn wrap-symbol? [sym]
+(defn handle-nil [value]
+  (if (some? value)
+    value
+    ((get-nil-handler))))
+
+(defn get-failures [params]
+  (->> params
+       (map handle-nil)
+       (filter (get-failure?-fn))))
+
+(defn- wrap-symbol? [sym]
   (letfn [(reserved? [sym]
             (or (special-symbol? sym)
                 (string/starts-with? (str sym) ".")
@@ -39,9 +49,34 @@
           (not (reserved? sym))
           (not (macro? sym))))))
 
-(defn wrap-form? [form]
+(defn- wrap-form? [form]
   (and (or (list? form)
            (instance? Cons form))
        (or
          (-> form first symbol? not)
          (-> form first wrap-symbol?))))
+
+(defn wrap
+  ([f]
+    (wrap f (get-unexpected-exception-handler)))
+  ([f exception-handler]
+   (fn [& args]
+     (let [failures (get-failures args)]
+       (if (empty? failures)
+         (try
+           (if-let [result (apply f args)]
+             result
+             ((get-nil-handler)))
+           (catch Exception e (exception-handler e)))
+         ((get-multiple-failure-handler) failures))))))
+
+(defn wrap-form [form]
+  (if (wrap-form? form)
+    (cons (list wrap (first form)) (next form))
+    `(handle-nil ~form)))
+
+(defn wrap-initial-thread-form [form]
+  (if (wrap-form? form)
+    (cons (list wrap (first form)) (next form))
+    form))
+

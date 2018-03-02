@@ -12,7 +12,8 @@
       (roc/set-nil-handler! (fn [] :nil))
       (roc/set-exception-handler! (fn [_] :unexpected-exception))
       (is (= (roc/-> 1 ((fn [_] (throw (RuntimeException.))))) :unexpected-exception))
-      (is (= (roc/-> nil ((fn [_] nil))) :nil))
+      (is (= (let [nil-failure nil] 
+               (roc/-> nil-failure ((fn [_] nil)))) :nil))
       (finally
         (impl/reset-failure-handlers)))))
 
