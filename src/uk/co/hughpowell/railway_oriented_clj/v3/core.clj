@@ -61,14 +61,17 @@
           (when more
             (list* `assert-args more)))))
 
+(defn- bind-form [form]
+  (if (impl/wrap-form? form)
+    (cons (list wrap (first form)) (next form))
+    form))
+
 (defmacro ->
   "Thread first similar to the core macro, except that if a failure is
   discovered execution halts and the error is returned."
   [x & forms]
-  (loop [value (if (list? x) (second x) x)
-         forms (if (list? x)
-                 (cons (cons (first x) (drop 2 x)) forms)
-                 forms)]
+  (loop [value (bind-form x)
+         forms forms]
     (if forms
       (let [form (first forms)
             threaded (if (seq? form)
@@ -90,10 +93,8 @@
   "Thread last similar to the core macro, except that if a failure
   occurs execution halts and the error is returned."
   [x & forms]
-  (loop [value (if (list? x) (last x) x)
-         forms (if (list? x)
-                 (cons (cons (first x) (rest (butlast x))) forms)
-                 forms)]
+  (loop [value (bind-form x)
+         forms forms]
     (if forms
       (let [form (first forms)
             threaded (if (seq? form)
@@ -110,11 +111,6 @@
          (if (some? value#)
            value#
            ((impl/get-nil-handler)))))))
-
-(defn- bind-form [form]
-  (if (impl/wrap-form? form)
-    (cons (list wrap (first form)) (next form))
-    form))
 
 (defmacro as->
   "Thread 'as' similar to the core macro, except that if a failure

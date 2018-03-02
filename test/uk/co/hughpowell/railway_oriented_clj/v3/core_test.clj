@@ -66,7 +66,15 @@
     (is (= (roc/-> 1 and) 1)))
   (testing
     "Allowing bare keywords inside the thread"
-    (is (= (roc/-> {:a 1} :a) 1))))
+    (is (= (roc/-> {:a 1} :a) 1)))
+  (testing
+    "Local bindings are wrapped"
+    (let [failure (RuntimeException.)
+          do-something (constantly failure)
+          do-something-else (fn [_] :fail)]
+      (is (= (roc/-> (do-something)
+                     do-something-else)
+             failure)))))
 
 (deftest thread-last
   (testing
@@ -119,7 +127,15 @@
     (is (= (roc/->> 1 and) 1)))
   (testing
     "Allowing bare keywords inside the thread"
-    (is (= (roc/->> {:a 1} :a) 1))))
+    (is (= (roc/->> {:a 1} :a) 1)))
+  (testing
+    "Local bindings are wrapped"
+    (let [failure (RuntimeException.)
+          do-something (constantly failure)
+          do-something-else (fn [_] :fail)]
+      (is (= (roc/->> (do-something)
+                      do-something-else)
+             failure)))))
 
 (deftest thread-as
   (testing
