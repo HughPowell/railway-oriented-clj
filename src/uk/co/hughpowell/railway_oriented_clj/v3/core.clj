@@ -1,8 +1,7 @@
 (ns uk.co.hughpowell.railway-oriented-clj.v3.core
   (:refer-clojure :exclude [-> ->> as-> comp when-let if-let])
   (:require [clojure.core :as core]
-            [uk.co.hughpowell.railway-oriented-clj.v3.impl :as impl])
-  (:import (clojure.lang Cons)))
+            [uk.co.hughpowell.railway-oriented-clj.v3.impl :as impl]))
 
 ;; Set up
 
@@ -62,14 +61,6 @@
           (when more
             (list* `assert-args more)))))
 
-(defn wrap-form? [form]
-  (and (or (list? form)
-           (instance? Cons form))
-       (or (core/-> form first symbol? not)
-           (not=
-             (core/-> form first resolve meta :ns)
-             (core/-> wrap-form? var meta :ns)))))
-
 (defmacro ->
   "Thread first similar to the core macro, except that if a failure is
   discovered execution halts and the error is returned."
@@ -82,11 +73,13 @@
       (let [form (first forms)
             threaded (if (seq? form)
                        (with-meta
-                         (if (wrap-form? form)
+                         (if (impl/wrap-form? form)
                            `((wrap ~(first form)) ~value ~@(next form))
                            `(~(first form) ~value ~@(next form)))
                          (meta form))
-                       (list `(wrap ~form) value))]
+                       (if (impl/is-fn? form)
+                         (list `(wrap ~form) value)
+                         (list form value)))]
         (recur threaded (next forms)))
       `(let [value# ~value]
          (if (some? value#)
@@ -105,11 +98,13 @@
       (let [form (first forms)
             threaded (if (seq? form)
                        (with-meta
-                         (if (wrap-form? form)
+                         (if (impl/wrap-form? form)
                            `((wrap ~(first form)) ~@(next form) ~value)
                            `(~(first form) ~@(next form) ~value))
                          (meta form))
-                       (list `(wrap ~form) value))]
+                       (if (impl/is-fn? form)
+                         (list `(wrap ~form) value)
+                         (list form value)))]
         (recur threaded (next forms)))
       `(let [value# ~value]
          (if (some? value#)
@@ -117,7 +112,7 @@
            ((impl/get-nil-handler)))))))
 
 (defn- bind-form [form]
-  (if (wrap-form? form)
+  (if (impl/wrap-form? form)
     (cons (list wrap (first form)) (next form))
     form))
 

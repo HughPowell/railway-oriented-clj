@@ -1,4 +1,5 @@
-(ns uk.co.hughpowell.railway-oriented-clj.v3.impl)
+(ns uk.co.hughpowell.railway-oriented-clj.v3.impl
+  (:import (clojure.lang Cons)))
 
 (def ^:private default-failure-handlers
   {:failure?                     (partial instance? Exception)
@@ -24,3 +25,15 @@
 
 (defn reset-failure-handlers []
   (reset! failure-handlers default-failure-handlers))
+
+(defn is-fn? [sym]
+  (and
+    (-> sym resolve var?)
+    (-> sym resolve meta :macro not)))
+
+(defn wrap-form? [form]
+  (and (or (list? form)
+           (instance? Cons form))
+       (or
+         (-> form first symbol? not)
+         (-> form first is-fn?))))

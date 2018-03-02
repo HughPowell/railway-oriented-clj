@@ -57,7 +57,13 @@
     "Threading a success into a multi-parameter function containing
     a failure"
     (let [failure (RuntimeException.)]
-      (is (= (roc/-> 2 (- failure)) failure)))))
+      (is (= (roc/-> 2 (- failure)) failure))))
+  (testing
+    "Allowing macro forms inside the thread"
+    (is (= (roc/-> :a name (or nil)) "a")))
+  (testing
+    "Allowing bare macros inside the thread"
+    (is (= (roc/-> 1 and) 1))))
 
 (deftest thread-last
   (testing
@@ -101,7 +107,13 @@
     "Threading a success into a multi-parameter function containing
     a failure should return that failure"
     (let [failure (RuntimeException.)]
-      (is (= (roc/->> 2 (- failure)) failure)))))
+      (is (= (roc/->> 2 (- failure)) failure))))
+  (testing
+    "Allowing macro forms inside the thread"
+    (is (= (roc/->> :a name (and "b")) "a")))
+  (testing
+    "Allowing bare macros inside the thread"
+    (is (= (roc/->> 1 and) 1))))
 
 (deftest thread-as
   (testing
@@ -139,7 +151,13 @@
     that failure"
     (let [failure (RuntimeException.)]
       (is (= (roc/as-> 2 $
-                       (+ failure $)))))))
+                       (+ failure $))))))
+  (testing
+    "Allowing macro forms inside the thread"
+    (is (= (roc/as-> 1 $
+                     (inc $)
+                     (and $ "a"))
+           "a"))))
 
 (deftest wrap
   (testing
@@ -252,5 +270,14 @@
     "Execute the 'else' branch when the result is nil"
     (is (instance? NullPointerException (let [nil-failure nil] (roc/if-let [x nil-failure]
                                                                            :success
-                                                                           x))))))
+                                                                           x)))))
+  (testing
+    "Allow use of macros inside the binding"
+    (is (= (roc/if-let [result (case :three
+                                 :one "one"
+                                 :two "two"
+                                 "many")]
+                       result
+                       :failure)
+           "many"))))
 
