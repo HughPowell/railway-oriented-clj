@@ -77,7 +77,7 @@
                            `((wrap ~(first form)) ~value ~@(next form))
                            `(~(first form) ~value ~@(next form)))
                          (meta form))
-                       (if (impl/is-fn? form)
+                       (if (impl/wrap-symbol? form)
                          (list `(wrap ~form) value)
                          (list form value)))]
         (recur threaded (next forms)))
@@ -102,7 +102,7 @@
                            `((wrap ~(first form)) ~@(next form) ~value)
                            `(~(first form) ~@(next form) ~value))
                          (meta form))
-                       (if (impl/is-fn? form)
+                       (if (impl/wrap-symbol? form)
                          (list `(wrap ~form) value)
                          (list form value)))]
         (recur threaded (next forms)))

@@ -63,7 +63,10 @@
     (is (= (roc/-> :a name (or nil)) "a")))
   (testing
     "Allowing bare macros inside the thread"
-    (is (= (roc/-> 1 and) 1))))
+    (is (= (roc/-> 1 and) 1)))
+  (testing
+    "Allowing bare keywords inside the thread"
+    (is (= (roc/-> {:a 1} :a) 1))))
 
 (deftest thread-last
   (testing
@@ -113,7 +116,10 @@
     (is (= (roc/->> :a name (and "b")) "a")))
   (testing
     "Allowing bare macros inside the thread"
-    (is (= (roc/->> 1 and) 1))))
+    (is (= (roc/->> 1 and) 1)))
+  (testing
+    "Allowing bare keywords inside the thread"
+    (is (= (roc/->> {:a 1} :a) 1))))
 
 (deftest thread-as
   (testing

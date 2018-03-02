@@ -26,14 +26,15 @@
 (defn reset-failure-handlers []
   (reset! failure-handlers default-failure-handlers))
 
-(defn is-fn? [sym]
-  (and
-    (-> sym resolve var?)
-    (-> sym resolve meta :macro not)))
+(defn wrap-symbol? [sym]
+  (or (keyword? sym)
+      (and
+        (-> sym resolve var?)
+        (-> sym resolve meta :macro not))))
 
 (defn wrap-form? [form]
   (and (or (list? form)
            (instance? Cons form))
        (or
          (-> form first symbol? not)
-         (-> form first is-fn?))))
+         (-> form first wrap-symbol?))))
