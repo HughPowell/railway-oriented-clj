@@ -1,4 +1,4 @@
-(defproject uk.co.hughpowell/railway-oriented-clj "0.3.11-SNAPSHOT"
+(defproject uk.co.hughpowell/railway-oriented-clj "0.3.11"
   :description "Stop throwing exceptions, discard nil and explicitly deal with your failures"
   :url "https://github.com/HughPowell/railway-oriented-clj"
   :license {:name "Mozilla Public License v2.0"
