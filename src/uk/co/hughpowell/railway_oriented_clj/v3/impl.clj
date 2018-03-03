@@ -32,12 +32,6 @@
     value
     ((get-nil-handler))))
 
-(defmacro wrap-forms [forms]
-  `(try
-     (handle-nil ~forms)
-     (catch Exception e#
-       ((get-unexpected-exception-handler) e#))))
-
 (defn get-failures [params]
   (->> params
        (map handle-nil)
@@ -70,19 +64,24 @@
      (let [failures (get-failures args)]
        (if (empty? failures)
          (try
-           (if-let [result (apply f args)]
-             result
-             ((get-nil-handler)))
+           (handle-nil (apply f args))
            (catch Exception e (exception-handler e)))
          ((get-multiple-failure-handler) failures))))))
 
 (defn wrap-form [form]
   (if (wrap-form? form)
     (cons (list wrap (first form)) (next form))
-    `(handle-nil ~form)))
-
-(defn wrap-initial-thread-form [form]
-  (if (wrap-form? form)
-    (cons (list wrap (first form)) (next form))
     form))
+
+(defn wrap-callable-form [form]
+  (cond
+    (wrap-form? form) (cons (list wrap (first form)) (next form))
+    (and (symbol? form) (wrap-symbol? form)) (list (list wrap form))
+    :else form))
+
+(defmacro wrap-forms [forms]
+  `(try
+     (handle-nil ~forms)
+     (catch Exception e#
+       ((get-unexpected-exception-handler) e#))))
 

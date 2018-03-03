@@ -51,44 +51,25 @@
   "Thread first similar to the core macro, except that if a failure is
   discovered execution halts and the error is returned."
   [x & forms]
-  (loop [value (impl/wrap-initial-thread-form x)
-         forms forms]
-    (if forms
-      (let [form (first forms)
-            threaded (if (seq? form)
-                       (with-meta
-                         (impl/wrap-form `(~(first form) ~value ~@(next form)))
-                         (meta form))
-                       (impl/wrap-form (list form value)))]
-        (recur threaded (next forms)))
-      `(impl/wrap-forms ~value))))
+  `(impl/wrap-forms
+     (core/-> ~(impl/wrap-form x)
+              ~@(map impl/wrap-callable-form forms))))
 
 (defmacro ->>
   "Thread last similar to the core macro, except that if a failure
   occurs execution halts and the error is returned."
   [x & forms]
-  (loop [value (impl/wrap-initial-thread-form x)
-         forms forms]
-    (if forms
-      (let [form (first forms)
-            threaded (if (seq? form)
-                       (with-meta
-                         (impl/wrap-form `(~(first form) ~@(next form) ~value))
-                         (meta form))
-                       (impl/wrap-form (list form value)))]
-        (recur threaded (next forms)))
-      `(impl/wrap-forms ~value))))
+  `(impl/wrap-forms
+     (core/->> ~(impl/wrap-form x)
+               ~@(map impl/wrap-callable-form forms))))
 
 (defmacro as->
   "Thread 'as' similar to the core macro, except that if a failure
   occurs execution halts and the error is returned."
   [expr name & forms]
-  `(let [~name ~(impl/wrap-form expr)
-         ~@(interleave (repeat name) (map impl/wrap-form (butlast forms)))]
-     (impl/wrap-forms
-       ~(if (empty? forms)
-          name
-          (impl/wrap-form (last forms))))))
+  `(impl/wrap-forms
+     (core/as-> ~(impl/wrap-form expr) ~name
+                ~@(map impl/wrap-callable-form forms))))
 
 (defmacro when-let
   "Similar to the core when-let macro, except that multiple pairs are
