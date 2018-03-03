@@ -61,7 +61,7 @@
                          (meta form))
                        (impl/wrap-form (list form value)))]
         (recur threaded (next forms)))
-      `(impl/handle-nil ~value))))
+      `(impl/wrap-forms ~value))))
 
 (defmacro ->>
   "Thread last similar to the core macro, except that if a failure
@@ -77,7 +77,7 @@
                          (meta form))
                        (impl/wrap-form (list form value)))]
         (recur threaded (next forms)))
-      `(impl/handle-nil ~value))))
+      `(impl/wrap-forms ~value))))
 
 (defmacro as->
   "Thread 'as' similar to the core macro, except that if a failure
@@ -85,9 +85,10 @@
   [expr name & forms]
   `(let [~name ~(impl/wrap-form expr)
          ~@(interleave (repeat name) (map impl/wrap-form (butlast forms)))]
-     ~(if (empty? forms)
-        name
-        (impl/wrap-form (last forms)))))
+     (impl/wrap-forms
+       ~(if (empty? forms)
+          name
+          (impl/wrap-form (last forms))))))
 
 (defmacro when-let
   "Similar to the core when-let macro, except that multiple pairs are
@@ -100,7 +101,7 @@
   (loop [bindings (reverse bindings)
          expr `(do ~@exprs)]
     (if (empty? bindings)
-      expr
+      `(impl/wrap-forms ~expr)
       (let [form (second bindings)
             threaded `(let [temp# ~(impl/wrap-form (first bindings))]
                         (if ((impl/get-failure?-fn) temp#)
@@ -142,7 +143,7 @@
     (vector? bindings) "a vector for its bindings"
     (= 2 (count bindings)) "exactly 2 forms in binding vector")
   (let [form (bindings 0)]
-    `(let [result# ~(impl/wrap-form (bindings 1))
+    `(let [result# (impl/wrap-forms ~(impl/wrap-form (bindings 1)))
            ~form result#]
        (if ((impl/get-failure?-fn) result#)
          ~else

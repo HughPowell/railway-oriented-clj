@@ -32,6 +32,12 @@
     value
     ((get-nil-handler))))
 
+(defmacro wrap-forms [forms]
+  `(try
+     (handle-nil ~forms)
+     (catch Exception e#
+       ((get-unexpected-exception-handler) e#))))
+
 (defn get-failures [params]
   (->> params
        (map handle-nil)
