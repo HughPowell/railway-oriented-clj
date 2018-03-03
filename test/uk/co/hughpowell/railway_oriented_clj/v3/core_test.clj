@@ -12,7 +12,7 @@
       (roc/set-nil-handler! (fn [] :nil))
       (roc/set-exception-handler! (fn [_] :unexpected-exception))
       (is (= (roc/-> 1 ((fn [_] (throw (RuntimeException.))))) :unexpected-exception))
-      (is (= (let [nil-failure nil] 
+      (is (= (let [nil-failure nil]
                (roc/-> nil-failure ((fn [_] nil)))) :nil))
       (finally
         (impl/reset-failure-handlers)))))
@@ -35,7 +35,7 @@
     (is (= (roc/-> (- 2 1)) 1)))
   (testing
     "Allow evaluation of railway oriented clj macro"
-    (is (= (roc/-> 1 inc (roc/-> dec)) 1)))
+    (is (= (roc/-> 1 inc (roc/->> dec)) 1)))
   (testing
     "A single function with a failed parameter should return the failure."
     (let [failure (RuntimeException.)]
@@ -68,6 +68,13 @@
   (testing
     "Allowing bare keywords inside the thread"
     (is (= (roc/-> {:a 1} :a) 1)))
+  (testing
+    "Bare keywords are wrapped"
+    (let [failure (RuntimeException.)]
+      (is (= (roc/-> {:a 1}
+                     ((fn [_] failure))
+                     :a)
+             failure))))
   (testing
     "Local bindings are wrapped"
     (let [failure (RuntimeException.)
@@ -129,6 +136,13 @@
   (testing
     "Allowing bare keywords inside the thread"
     (is (= (roc/->> {:a 1} :a) 1)))
+  (testing
+    "Bare keywords are wrapped"
+    (let [failure (RuntimeException.)]
+      (is (= (roc/->> {:a 1}
+                      ((fn [_] failure))
+                      :a)
+             failure))))
   (testing
     "Local bindings are wrapped"
     (let [failure (RuntimeException.)
@@ -291,9 +305,10 @@
              failure))))
   (testing
     "Execute the 'else' branch when the result is nil"
-    (is (instance? NullPointerException (let [nil-failure nil] (roc/if-let [x nil-failure]
-                                                                           :success
-                                                                           x)))))
+    (is (instance? NullPointerException (let [nil-failure nil]
+                                          (roc/if-let [x nil-failure]
+                                                      :success
+                                                      x)))))
   (testing
     "Allow use of macros inside the binding"
     (is (= (roc/if-let [result (case :three

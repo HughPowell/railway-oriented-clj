@@ -76,7 +76,7 @@
 (defn wrap-callable-form [form]
   (cond
     (wrap-form? form) (cons (list wrap (first form)) (next form))
-    (and (symbol? form) (wrap-symbol? form)) (list (list wrap form))
+    (and (not (list? form)) (wrap-symbol? form)) (list (list wrap form))
     :else form))
 
 (defmacro wrap-forms [forms]
