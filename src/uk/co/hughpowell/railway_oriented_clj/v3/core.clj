@@ -51,25 +51,39 @@
   "Thread first similar to the core macro, except that if a failure is
   discovered execution halts and the error is returned."
   [x & forms]
-  `(impl/wrap-forms
-     (core/-> ~(impl/wrap-form x)
-              ~@(map impl/wrap-callable-form forms))))
+  (let [g (gensym)
+        steps (map (fn [form] `~(impl/wrap-form form g '->)) forms)]
+    `(impl/wrap-forms
+       (let [~g ~(impl/wrap-form x)
+             ~@(interleave (repeat g) (butlast steps))]
+         ~(if (empty? steps)
+            g
+            (last steps))))))
 
 (defmacro ->>
   "Thread last similar to the core macro, except that if a failure
   occurs execution halts and the error is returned."
   [x & forms]
-  `(impl/wrap-forms
-     (core/->> ~(impl/wrap-form x)
-               ~@(map impl/wrap-callable-form forms))))
+  (let [g (gensym)
+        steps (map (fn [form] `~(impl/wrap-form form g '->>)) forms)]
+    `(impl/wrap-forms
+       (let [~g ~(impl/wrap-form x)
+             ~@(interleave (repeat g) (butlast steps))]
+         ~(if (empty? steps)
+            g
+            (last steps))))))
 
 (defmacro as->
   "Thread 'as' similar to the core macro, except that if a failure
   occurs execution halts and the error is returned."
   [expr name & forms]
-  `(impl/wrap-forms
-     (core/as-> ~(impl/wrap-form expr) ~name
-                ~@(map impl/wrap-callable-form forms))))
+  (let [steps (map (fn [form] `~(impl/wrap-form form name)) forms)]
+    `(impl/wrap-forms
+       (let [~name ~(impl/wrap-form expr)
+             ~@(interleave (repeat name) (butlast steps))]
+         ~(if (empty? steps)
+            name
+            (last steps))))))
 
 (defmacro when-let
   "Similar to the core when-let macro, except that multiple pairs are

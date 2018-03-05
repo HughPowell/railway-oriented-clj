@@ -49,12 +49,15 @@
           (not (reserved? sym))
           (not (macro? sym))))))
 
-(defn- wrap-form? [form]
+(defn- wrap-list-form? [form]
   (and (or (list? form)
            (instance? Cons form))
        (or
          (-> form first symbol? not)
          (-> form first wrap-symbol?))))
+
+(defn- wrap-bare-form? [form]
+  (and (not (list? form)) (wrap-symbol? form)))
 
 (defn wrap
   ([f]
@@ -68,20 +71,28 @@
            (catch Exception e (exception-handler e)))
          ((get-multiple-failure-handler) failures))))))
 
-(defn wrap-form [form]
-  (if (wrap-form? form)
-    (cons (list wrap (first form)) (next form))
-    form))
-
-(defn wrap-callable-form [form]
+(defn wrap-form
+  ([form]
+   (if (wrap-list-form? form)
+     (cons (list wrap (first form)) (next form))
+     form))
+  ([form sym]
   (cond
-    (wrap-form? form) (cons (list wrap (first form)) (next form))
-    (and (not (list? form)) (wrap-symbol? form)) (list (list wrap form))
-    :else form))
+    (wrap-list-form? form) (cons (list wrap (first form)) (next form))
+    (wrap-bare-form? form) (list (list wrap form))
+    :else `(if ((get-failure?-fn) ~sym)
+             ~sym
+             ~form)))
+  ([form sym thread]
+  (cond
+    (wrap-list-form? form) (list thread sym (cons (list wrap (first form)) (next form)))
+    (wrap-bare-form? form) (list thread sym (list (list wrap form)))
+    :else `(if ((get-failure?-fn) ~sym)
+             ~sym
+             ~(list thread sym form)))))
 
 (defmacro wrap-forms [forms]
   `(try
      (handle-nil ~forms)
      (catch Exception e#
        ((get-unexpected-exception-handler) e#))))
-
